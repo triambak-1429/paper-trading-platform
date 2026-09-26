@@ -81,7 +81,7 @@ from app.models.stock import Stock
 from app.models.holding import Holding
 from app.models.transaction import Transaction
 from app.models.watchlist import Watchlist
-
+from app.models.portfolio_snapshot import PortfolioSnapshot
 
 target_metadata = Base.metadata
 

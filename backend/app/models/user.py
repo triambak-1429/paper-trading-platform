@@ -11,5 +11,5 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
-    balance = Column(Float, default=1000000.0)
+    balance = Column(Float, default=999999999999.00)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
