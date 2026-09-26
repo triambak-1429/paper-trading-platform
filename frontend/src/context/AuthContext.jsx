@@ -36,17 +36,29 @@ export function AuthProvider({ children }) {
         loadUser();
     }, []);
 
-    async function login(email, password) {
-        await loginUser(email, password);
+     async function login(email, password) {
+        // 1. Capture the token object returned by your FastAPI backend
+        const data = await loginUser(email, password);
+        
+        // 2. Save it to localStorage so subsequent requests can read it
+        localStorage.setItem("access_token", data.access_token);
+        
+        // 3. Load the user information now that the token is present
         await loadUser();
     }
 
     async function register(name, email, password) {
-        await registerUser(name, email, password);
+        const data = await registerUser(name, email, password);
+        
+        // Optional: If your register route also returns a token, you can log them in instantly:
+        // if (data.access_token) {
+        //     localStorage.setItem("access_token", data.access_token);
+        //     await loadUser();
+        // }
     }
 
     function logout() {
-        logoutUser();
+        localStorage.removeItem("access_token"); // Clean storage token
         setUser(null);
     }
 

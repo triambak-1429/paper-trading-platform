@@ -51,70 +51,52 @@ export async function getHistory(
 // AUTHENTICATION
 // =========================
 
-export async function registerUser(
-    name,
-    email,
-    password
-) {
-    const response = await fetch(
-        `${API_URL}/auth/register`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name,
-                email,
-                password
-            })
-        }
-    );
-
-    const data = await response.json();
+export async function registerUser(name, email, password) {
+    const response = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, password })
+    });
 
     if (!response.ok) {
-        throw new Error(
-            data.detail || "Registration failed"
-        );
+        let errorMessage = "Registration failed";
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+            errorMessage = `Server Error (${response.status})`;
+        }
+        throw new Error(errorMessage);
     }
 
-    return data;
+    return response.json();
 }
 
+export async function loginUser(email, password) {
+    const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    });
 
-export async function loginUser(
-    email,
-    password
-) {
-    const response = await fetch(
-        `${API_URL}/auth/login`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        }
-    );
-
-    const data = await response.json();
-
+    // 1. Check if the response failed BEFORE parsing JSON
     if (!response.ok) {
-        throw new Error(
-            data.detail || "Login failed"
-        );
+        let errorMessage = "Login failed";
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+            errorMessage = `Server Error (${response.status})`;
+        }
+        throw new Error(errorMessage);
     }
 
-    localStorage.setItem(
-        "access_token",
-        data.access_token
-    );
-
-    return data;
+    // 2. Safely parse successful JSON return payload
+    return response.json();
 }
 
 
@@ -357,22 +339,26 @@ export async function sellStock(
 export async function getCurrentUser() {
     const token = localStorage.getItem("access_token");
 
-    const response = await fetch(
-        `${API_URL}/users/me`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+    const response = await fetch(`${API_URL}/users/me`, {
+        headers: {
+            "Authorization": `Bearer ${token}`
         }
-    );
+    });
 
-    const data = await response.json();
-
+    // 1. Check if the response failed BEFORE parsing JSON
     if (!response.ok) {
-        throw new Error(data.detail || "Failed to get user");
+        let errorMessage = "Failed to get user";
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+            errorMessage = `Server Error (${response.status})`;
+        }
+        throw new Error(errorMessage);
     }
 
-    return data;
+    // 2. Safely parse and return successful data payload
+    return response.json();
 }
 
 export async function searchAssets(query, type = "") {
